@@ -1,9 +1,8 @@
 #include "ImageViewer.hpp"
 
-#if defined(ARDUINO_M5STACK_DIAL) || defined(ARDUINO_M5STACK_DIN_METER)
+#include "M5Dial.h"
 #include "M5Encoder.hpp"
 
-#if defined(ARDUINO_M5STACK_DIAL)
 inline int16_t getEncoderOffset(void) {
     return 4;
 }
@@ -23,27 +22,6 @@ inline int32_t getTextAreaWidth(void) {
 inline int32_t getTextAreaHeight(void) {
     return 170;
 }
-#else
-inline int16_t getEncoderOffset(void) {
-    return 2;
-}
-
-inline int32_t getTextAreaX(void) {
-    return 0;
-}
-
-inline int32_t getTextAreaY(void) {
-    return 0;
-}
-
-inline int32_t getTextAreaWidth(void) {
-    return M5.Lcd.width();
-}
-
-inline int32_t getTextAreaHeight(void) {
-    return M5.Lcd.height();
-}
-#endif
 
 static M5Encoder encoder;
 static int16_t prev_dial_pos = 0;
@@ -69,51 +47,12 @@ inline int16_t getDirection(void) {
     if (abs(prev_dial_pos - pos) >= getEncoderOffset()) {
         const int16_t direction = pos - prev_dial_pos > 0 ? 1 : -1;
         prev_dial_pos = pos;
+        M5Dial.Speaker.tone(8000, 20);
         return direction;
     } else {
         return 0;
     }
 }
-#else
-inline void M5_BEGIN(m5::M5Unified::config_t cfg) {
-    M5.begin(cfg);
-}
-
-inline void M5_BEGIN(void) {
-    auto cfg = M5.config();
-    M5.begin(cfg);
-}
-
-inline void M5_UPDATE(void) {
-    M5.update();
-}
-
-inline int32_t getDirection(void) {
-    if (M5.BtnA.wasClicked()) {
-        return 1;
-    } else if (M5.BtnC.wasClicked()) {
-        return -1;
-    } else {
-        return 0;
-    }
-}
-
-inline int32_t getTextAreaX(void) {
-    return 0;
-}
-
-inline int32_t getTextAreaY(void) {
-    return 0;
-}
-
-inline int32_t getTextAreaWidth(void) {
-    return M5.Lcd.width();
-}
-
-inline int32_t getTextAreaHeight(void) {
-    return M5.Lcd.height();
-}
-#endif
 
 #include <Arduino_JSON.h>
 #include <string.h>
@@ -158,16 +97,7 @@ bool ImageViewer::begin(int bgColor) {
     M5_BEGIN();
 
     this->_orientation = M5.Lcd.getRotation();
-#if defined(ARDUINO_M5STACK_CARDPUTER)  // TODO: removed when M5GFX v0.1.16 is
-                                        // released
-    this->_orientation = 1;
-#endif
     M5.Lcd.setRotation(this->_orientation);
-
-#if defined(ARDUINO_M5STACK_COREINK) || defined(ARDUINO_M5STACK_PAPER)
-    M5.Lcd.invertDisplay(false);
-    M5.Lcd.setEpdMode(epd_mode_t::epd_quality);
-#endif
 
     M5.Lcd.setTextScroll(true);
     M5.Lcd.setCursor(getTextAreaX(), getTextAreaY());
