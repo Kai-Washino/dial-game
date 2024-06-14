@@ -3,6 +3,7 @@
 // clang-format on
 
 ImageViewer viewer;
+int i;
 
 void forever(void) {
     while (true) {
@@ -14,11 +15,10 @@ void setup(void) {
     if (!viewer.begin()) {
         forever();
     }
+    i = 0;
 }
 
 void loop(void) {
-    viewer.indexView(0);
-    delay(1000);
-    viewer.indexView(1);
+    viewer.indexView(i++ % 14);
     delay(1000);
 }
