@@ -155,15 +155,15 @@ bool ImageViewer::begin(int bgColor) {
     delay(DEFAULT_START_INTERVAL_MS);
     M5.Lcd.clear();
     M5.Lcd.fillScreen(bgColor);
-    if (this->_isAutoRotation) {
-        updateOrientation();
-    } else {
-        M5.Lcd.setRotation(this->_orientation);
-    }
+    // if (this->_isAutoRotation) {
+    //     updateOrientation();
+    // } else {
+    //     M5.Lcd.setRotation(this->_orientation);
+    // }
 
-    if (!this->_isAutoMode) {
-        showImage(this->_imageFiles, this->_pos);
-    }
+    // if (!this->_isAutoMode) {
+    //     showImage(this->_imageFiles, this->_pos);
+    // }
 
     return true;
 }
