@@ -17,6 +17,8 @@ void setup(void) {
 }
 
 void loop(void) {
-    viewer.update();
-    delay(100);
+    viewer.indexView(0);
+    delay(1000);
+    viewer.indexView(1);
+    delay(1000);
 }

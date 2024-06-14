@@ -61,6 +61,7 @@ public:
     virtual bool update(void);
 
     virtual bool updateOrientation(float threshold = GRAVITY_THRESHOLD);
+    virtual void indexView(uint16_t index);
 
 protected:
     virtual bool setImageFileList(const String& path = ROOT_DIR);
