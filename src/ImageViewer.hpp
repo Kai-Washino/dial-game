@@ -62,10 +62,13 @@ public:
 
     virtual bool updateOrientation(float threshold = GRAVITY_THRESHOLD);
     virtual void indexView(uint16_t index);
+    virtual void indexView(uint16_t index, uint8_t place);
 
 protected:
     virtual bool setImageFileList(const String& path = ROOT_DIR);
     virtual void showImage(const String images[], size_t p);
+    virtual void showImage(const String images[], size_t p, int16_t x,
+                           int16_t y, float size);
     virtual bool hasExt(const char* filename, const char* ext) const;
     virtual bool isJpeg(const char* filename) const;
     virtual bool isPng(const char* filename) const;
