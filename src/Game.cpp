@@ -1,12 +1,17 @@
 #include "Game.hpp"
 
+#include "Adafruit_NeoPixel.h"
 #include "ImageViewer.hpp"
 #include "M5Dial.h"
 
 static ImageViewer viewer;
 
-Game::Game() : _card01("44073ba2d5980"), _card02("44073ba2d5980") {
-    // 他のカードも初期化が必要であれば、ここで行います。
+Game::Game(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright)
+    : _ledNum(ledNum),
+      _ledBright(ledBright),
+      _strip(ledNum, ledPin, NEO_GRB + NEO_KHZ800),
+      _card01("44073ba2d5980"),
+      _card02("44073ba2d5980") {
 }
 
 Game::~Game() {
@@ -17,6 +22,9 @@ bool Game::begin() {
     M5.begin(cfg);  // M5.begin()の追加
     M5Dial.begin(cfg, false, true);
     viewer.begin();
+    this->_strip.begin();
+    this->_strip.setBrightness(this->_ledBright);
+    this->_strip.show();
     M5Dial.Display.setTextDatum(middle_center);
     return true;
 }
@@ -44,9 +52,17 @@ void Game::checkUid(String uid) {
 
 void Game::correct() {
     viewer.indexView(0);
+    lightUp();
 }
 
 void Game::failed() {
     M5Dial.Display.drawString("Failed", M5Dial.Display.width() / 2,
                               M5Dial.Display.height() / 2);
+}
+
+void Game::lightUp() {
+    for (int i = 0; i < this->_strip.numPixels(); i++) {
+        this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
+    }
+    this->_strip.show();
 }
