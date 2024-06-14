@@ -155,15 +155,15 @@ bool ImageViewer::begin(int bgColor) {
     delay(DEFAULT_START_INTERVAL_MS);
     M5.Lcd.clear();
     M5.Lcd.fillScreen(bgColor);
-    if (this->_isAutoRotation) {
-        updateOrientation();
-    } else {
-        M5.Lcd.setRotation(this->_orientation);
-    }
+    // if (this->_isAutoRotation) {
+    //     updateOrientation();
+    // } else {
+    //     M5.Lcd.setRotation(this->_orientation);
+    // }
 
-    if (!this->_isAutoMode) {
-        showImage(this->_imageFiles, this->_pos);
-    }
+    // if (!this->_isAutoMode) {
+    //     showImage(this->_imageFiles, this->_pos);
+    // }
 
     return true;
 }
@@ -201,6 +201,58 @@ bool ImageViewer::update(void) {
 void ImageViewer::indexView(uint16_t index) {
     if (index < _nImageFiles) {
         showImage(_imageFiles, index);
+    } else {
+        M5.Lcd.println("Invalid image index");
+    }
+}
+
+void ImageViewer::indexView(uint16_t index, uint8_t place) {
+    uint16_t sizeX = M5.Display.width() / 4;
+    uint16_t sizeY = M5.Display.height() / 4;
+    int16_t placeX;
+    int16_t placeY;
+
+    switch (place) {
+        case 0:
+            placeX = sizeX * 0;
+            placeY = sizeY * 1.5;
+            break;
+        case 1:
+            placeX = sizeX * 1.1;
+            placeY = sizeY * 1.1;
+            break;
+        case 2:
+            placeX = sizeX * 1.5;
+            placeY = sizeY * 0;
+            break;
+        case 3:
+            placeX = sizeX * 1.1;
+            placeY = sizeY * -1.1;
+            break;
+        case 4:
+            placeX = sizeX * 0;
+            placeY = sizeY * -1.5;
+            break;
+        case 5:
+            placeX = sizeX * -1.1;
+            placeY = sizeY * -1.1;
+            break;
+        case 6:
+            placeX = sizeX * -1.5;
+            placeY = sizeY * 0;
+            break;
+        case 7:
+            placeX = sizeX * -1;
+            placeY = sizeY * 1;
+            break;
+        default:
+            placeX = sizeX * 0;
+            placeY = sizeY * 0;
+            break;
+    }
+
+    if (index < _nImageFiles) {
+        showImage(_imageFiles, index, placeX, placeY, 0.2F);
     } else {
         M5.Lcd.println("Invalid image index");
     }
@@ -259,6 +311,29 @@ void ImageViewer::showImage(const String images[], size_t p) {
     } else if (isBmp(filename)) {
         M5.Lcd.drawBmpFile(filename, 0, 0, M5.Display.width(),
                            M5.Display.height(), 0, 0, 0.0F, 0.0F,
+                           middle_center);
+    } else {
+        M5.Lcd.printf("ignore: %s", filename);
+        M5.Lcd.println();
+    }
+    M5.Lcd.endWrite();
+}
+
+void ImageViewer::showImage(const String images[], size_t p, int16_t x,
+                            int16_t y, float size) {
+    const char* filename = images[p].c_str();
+    M5.Lcd.startWrite();
+    if (isJpeg(filename)) {
+        M5.Lcd.drawJpgFile(filename, x, y, M5.Display.width(),
+                           M5.Display.height(), 0, 0, size, size,
+                           middle_center);
+    } else if (isPng(filename)) {
+        M5.Lcd.drawPngFile(filename, x, y, M5.Display.width(),
+                           M5.Display.height(), 0, 0, size, size,
+                           middle_center);
+    } else if (isBmp(filename)) {
+        M5.Lcd.drawBmpFile(filename, x, y, M5.Display.width(),
+                           M5.Display.height(), 0, 0, size, size,
                            middle_center);
     } else {
         M5.Lcd.printf("ignore: %s", filename);
