@@ -198,6 +198,14 @@ bool ImageViewer::update(void) {
     return direction != 0;
 }
 
+void ImageViewer::indexView(uint16_t index) {
+    if (index < _nImageFiles) {
+        showImage(_imageFiles, index);
+    } else {
+        M5.Lcd.println("Invalid image index");
+    }
+}
+
 bool ImageViewer::setImageFileList(const String& path) {
     File root = IV_FS.open(path.c_str(), "r");
     if (!root and !root.isDirectory()) {
