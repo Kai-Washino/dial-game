@@ -1,12 +1,12 @@
 // clang-format off
-#include "Game.hpp"
+#include "Memory.hpp"
 // clang-format on
 
 #define PIN        2
 #define NUM_LEDS   48
 #define LED_BRIGHT 100
 
-Game game(PIN, NUM_LEDS, LED_BRIGHT);  // LEDの信号ピンとLEDの数と光度
+Memory memory(PIN, NUM_LEDS, LED_BRIGHT);  // LEDの信号ピンとLEDの数と光度
 
 void forever(void) {
     while (true) {
@@ -15,13 +15,13 @@ void forever(void) {
 }
 
 void setup(void) {
-    if (!game.begin()) {
+    if (!memory.begin()) {
         forever();
     }
 }
 
 void loop(void) {
-    game.read();
-    game.encoder();
-    game.effect();
+    memory.read();
+    memory.encoder();
+    memory.effect();
 }
