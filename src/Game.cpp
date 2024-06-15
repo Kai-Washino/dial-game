@@ -10,6 +10,7 @@ Game::Game(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright)
     : _ledNum(ledNum),
       _ledBright(ledBright),
       _strip(ledNum, ledPin, NEO_GRB + NEO_KHZ800),
+      _oldPosition(-999),
       _card01("44073ba2d5980"),
       _card02("44073ba2d5980") {
 }
@@ -20,7 +21,7 @@ Game::~Game() {
 bool Game::begin() {
     auto cfg = M5.config();
     M5.begin(cfg);  // M5.begin()の追加
-    M5Dial.begin(cfg, false, true);
+    M5Dial.begin(cfg, true, true);
     viewer.begin();
     this->_strip.begin();
     this->_strip.setBrightness(this->_ledBright);
@@ -42,6 +43,15 @@ void Game::read() {
     }
 }
 
+void Game::encoder() {
+    M5Dial.update();
+    long newPosition = M5Dial.Encoder.read();
+    if (newPosition != this->_oldPosition) {
+        M5Dial.Speaker.tone(8000, 20);
+        this->_oldPosition = newPosition;
+        changeEncoder(newPosition);
+    }
+}
 void Game::checkUid(String uid) {
     if (uid == this->_card01) {
         correct();
@@ -65,4 +75,10 @@ void Game::lightUp() {
         this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
     }
     this->_strip.show();
+}
+
+void Game::changeEncoder(long newPosition) {
+    M5Dial.Display.clear();
+    M5Dial.Display.drawString(String(newPosition), M5Dial.Display.width() / 2,
+                              M5Dial.Display.height() / 2);
 }

@@ -11,15 +11,19 @@ public:
     virtual ~Game();
     virtual bool begin();
     virtual void read();
+    virtual void encoder();
 
 protected:
     virtual void checkUid(String uid);
     virtual void correct();
     virtual void failed();
     virtual void lightUp();
+    virtual void changeEncoder(long newPosition);
 
     Adafruit_NeoPixel _strip;
     uint8_t _ledNum;
+
+    long _oldPosition;
 
     String _card01;
     String _card02;
