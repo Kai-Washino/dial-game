@@ -60,12 +60,15 @@ void Game::encoder() {
 void Game::effect() {
     if (this->_oldMode != this->_mode) {
         this->_effectStartTime = millis();
+        this->_oldMode = this->_mode;
     }
     if (this->_mode == "before") {
         effect04();
     } else if (this->_mode == "stay") {
-        effect02();
+        effect04();
     } else if (this->_mode == "correct") {
+        effect02();
+    } else if (this->_mode == "failed") {
         effect03();
     }
 }
@@ -117,11 +120,14 @@ void Game::effect01() {
 
 void Game::effect02() {
     // 黄色が円の中心から外に向かって光る
-    if ((millis() - this->_effectStartTime) % 500 > 450)
+
+    unsigned long currentTime = millis();
+    unsigned long elapsedTime = currentTime - this->_effectStartTime;
+    if (elapsedTime % 500 > 450) {
         for (int i = 0; i < this->_strip.numPixels(); i++) {
             this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
         }
-    else if ((millis() - this->_effectStartTime) % 500 > 300) {
+    } else if (elapsedTime % 500 > 300) {
         for (int i = 0; i < this->_strip.numPixels(); i++) {
             if (i % 3 == 2) {
                 this->_strip.setPixelColor(i, this->_strip.Color(255, 255, 0));
@@ -129,7 +135,7 @@ void Game::effect02() {
                 this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
             }
         }
-    } else if ((millis() - this->_effectStartTime) % 500 > 150) {
+    } else if (elapsedTime % 500 > 150) {
         for (int i = 0; i < this->_strip.numPixels(); i++) {
             if (i % 3 == 1) {
                 this->_strip.setPixelColor(i, this->_strip.Color(255, 255, 0));
@@ -146,6 +152,7 @@ void Game::effect02() {
             }
         }
     }
+
     this->_strip.show();
 }
 
