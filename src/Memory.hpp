@@ -12,5 +12,7 @@ public:
     virtual ~Memory();
 
 protected:
+    void compareCard(uint8_t nowCardNum, uint8_t oldCardNum) override;
+
 private:
 };
