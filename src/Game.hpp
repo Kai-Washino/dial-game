@@ -28,6 +28,9 @@ protected:
     virtual void setCurrentCardNum(uint8_t num);
     virtual uint8_t getCurrentCardNum();
 
+    virtual void viewImage(int index);
+    virtual void viewImage(int index, int place);
+
     void effect01();
     void effect02();
     void effect03();

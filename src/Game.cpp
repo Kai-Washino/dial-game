@@ -93,7 +93,6 @@ void Game::compareCard(uint8_t nowCardNum, uint8_t oldCardNum) {
 }
 
 void Game::correct() {
-    viewer.indexView(0);
     setMode("correct");
 }
 
@@ -126,6 +125,14 @@ void Game::setCurrentCardNum(uint8_t num) {
 }
 uint8_t Game::getCurrentCardNum() {
     return this->_currentCardNum;
+}
+
+void Game::viewImage(int index) {
+    viewer.indexView(index);
+}
+
+void Game::viewImage(int index, int place) {
+    viewer.indexView(index, place);
 }
 
 void Game::effect01() {
