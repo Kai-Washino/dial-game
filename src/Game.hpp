@@ -16,15 +16,17 @@ public:
 
 protected:
     virtual void checkUid(String uid);
+    virtual void compareCard(uint8_t nowCardNum, uint8_t oldCardNum);
     virtual void correct();
     virtual void failed();
     virtual void changeEncoder(long newPosition);
-    virtual String getUid(uint8_t cardNum);
-    virtual void setUid(uint8_t, String uid);
 
-    String _mode;
-    Adafruit_NeoPixel _strip;
-    uint8_t _ledNum;
+    virtual void setUid(uint8_t cardNum, String uid);
+    virtual String getUid(uint8_t cardNum);
+    virtual void setMode(String mode);
+    virtual String getMode();
+    virtual void setCurrentCardNum(uint8_t num);
+    virtual uint8_t getCurrentCardNum();
 
     void effect01();
     void effect02();
@@ -32,12 +34,15 @@ protected:
     void effect04();
     void effect05();
 
-    long _oldPosition;
-
 private:
     unsigned long _startTime;
     unsigned long _effectStartTime;
+    String _mode;
     String _oldMode;
-    uint8_t _ledBright;
+    long _oldPosition;
+    uint8_t _currentCardNum;
     String _cards[32];
+    uint8_t _ledBright;
+    Adafruit_NeoPixel _strip;
+    uint8_t _ledNum;
 };

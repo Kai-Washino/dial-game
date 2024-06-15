@@ -12,7 +12,8 @@ Game::Game(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright)
       _ledNum(ledNum),
       _ledBright(ledBright),
       _strip(ledNum, ledPin, NEO_GRB + NEO_KHZ800),
-      _oldPosition(-999) {
+      _oldPosition(-999),
+      _currentCardNum(255) {
     _cards[0] = "44073ba2d5980";
     _cards[1] = "44073ba2d5980";
 }
@@ -73,7 +74,18 @@ void Game::effect() {
     }
 }
 void Game::checkUid(String uid) {
-    if (uid == getUid(0)) {
+    int cardNum;
+    for (int i = 0; i < 32; i++) {
+        if (uid == getUid(i)) {
+            cardNum = i;
+        }
+    }
+    compareCard(cardNum, getCurrentCardNum());
+    setCurrentCardNum(cardNum);
+}
+
+void Game::compareCard(uint8_t nowCardNum, uint8_t oldCardNum) {
+    if (nowCardNum == oldCardNum) {
         correct();
     } else {
         failed();
@@ -97,18 +109,25 @@ void Game::changeEncoder(long newPosition) {
                               M5Dial.Display.height() / 2);
 }
 
-String Game::getUid(uint8_t cardNum) {
-    return this->_cards[cardNum];
-}
 void Game::setUid(uint8_t cardNum, String uid) {
     this->_cards[cardNum] = uid;
 }
-String Game::getMode() {
-    return this->_mode;
+String Game::getUid(uint8_t cardNum) {
+    return this->_cards[cardNum];
 }
 void Game::setMode(String mode) {
     this->_mode = mode;
 }
+String Game::getMode() {
+    return this->_mode;
+}
+void Game::setCurrentCardNum(uint8_t num) {
+    this->_currentCardNum = num;
+}
+uint8_t Game::getCurrentCardNum() {
+    return this->_currentCardNum;
+}
+
 void Game::effect01() {
     // 1秒に1回点滅する
     if ((this->_effectStartTime - millis()) % 1000 > 500) {
