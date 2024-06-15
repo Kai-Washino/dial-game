@@ -58,22 +58,22 @@ void Game::encoder() {
 }
 
 void Game::effect() {
-    if (this->_oldMode != this->_mode) {
+    if (this->_oldMode != getMode()) {
         this->_effectStartTime = millis();
-        this->_oldMode = this->_mode;
+        this->_oldMode = getMode();
     }
-    if (this->_mode == "before") {
+    if (getMode() == "before") {
+        effect01();
+    } else if (getMode() == "stay") {
         effect04();
-    } else if (this->_mode == "stay") {
-        effect04();
-    } else if (this->_mode == "correct") {
+    } else if (getMode() == "correct") {
         effect02();
-    } else if (this->_mode == "failed") {
+    } else if (getMode() == "failed") {
         effect03();
     }
 }
 void Game::checkUid(String uid) {
-    if (uid == this->_cards[0]) {
+    if (uid == getUid(0)) {
         correct();
     } else {
         failed();
@@ -82,11 +82,11 @@ void Game::checkUid(String uid) {
 
 void Game::correct() {
     viewer.indexView(0);
-    this->_mode = "correct";
+    setMode("correct");
 }
 
 void Game::failed() {
-    this->_mode = "failed";
+    setMode("failed");
     M5Dial.Display.drawString("Failed", M5Dial.Display.width() / 2,
                               M5Dial.Display.height() / 2);
 }
@@ -103,12 +103,17 @@ String Game::getUid(uint8_t cardNum) {
 void Game::setUid(uint8_t cardNum, String uid) {
     this->_cards[cardNum] = uid;
 }
-
+String Game::getMode() {
+    return this->_mode;
+}
+void Game::setMode(String mode) {
+    this->_mode = mode;
+}
 void Game::effect01() {
     // 1秒に1回点滅する
     if ((this->_effectStartTime - millis()) % 1000 > 500) {
         for (int i = 0; i < this->_strip.numPixels(); i++) {
-            this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
+            this->_strip.setPixelColor(i, this->_strip.Color(155, 155, 155));
         }
     } else {
         for (int i = 0; i < this->_strip.numPixels(); i++) {
