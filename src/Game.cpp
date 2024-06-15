@@ -7,12 +7,14 @@
 static ImageViewer viewer;
 
 Game::Game(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright)
-    : _ledNum(ledNum),
+    : _mode("before"),
+      _oldMode("before"),
+      _ledNum(ledNum),
       _ledBright(ledBright),
       _strip(ledNum, ledPin, NEO_GRB + NEO_KHZ800),
-      _oldPosition(-999),
-      _card01("44073ba2d5980"),
-      _card02("44073ba2d5980") {
+      _oldPosition(-999) {
+    _cards[0] = "44073ba2d5980";
+    _cards[1] = "44073ba2d5980";
 }
 
 Game::~Game() {
@@ -27,6 +29,8 @@ bool Game::begin() {
     this->_strip.setBrightness(this->_ledBright);
     this->_strip.show();
     M5Dial.Display.setTextDatum(middle_center);
+    this->_startTime = millis();
+    this->_effectStartTime = millis();
     return true;
 }
 
@@ -52,8 +56,21 @@ void Game::encoder() {
         changeEncoder(newPosition);
     }
 }
+
+void Game::effect() {
+    if (this->_oldMode != this->_mode) {
+        this->_effectStartTime = millis();
+    }
+    if (this->_mode == "before") {
+        effect04();
+    } else if (this->_mode == "stay") {
+        effect02();
+    } else if (this->_mode == "correct") {
+        effect03();
+    }
+}
 void Game::checkUid(String uid) {
-    if (uid == this->_card01) {
+    if (uid == this->_cards[0]) {
         correct();
     } else {
         failed();
@@ -62,23 +79,147 @@ void Game::checkUid(String uid) {
 
 void Game::correct() {
     viewer.indexView(0);
-    lightUp();
+    this->_mode = "correct";
 }
 
 void Game::failed() {
+    this->_mode = "failed";
     M5Dial.Display.drawString("Failed", M5Dial.Display.width() / 2,
                               M5Dial.Display.height() / 2);
-}
-
-void Game::lightUp() {
-    for (int i = 0; i < this->_strip.numPixels(); i++) {
-        this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
-    }
-    this->_strip.show();
 }
 
 void Game::changeEncoder(long newPosition) {
     M5Dial.Display.clear();
     M5Dial.Display.drawString(String(newPosition), M5Dial.Display.width() / 2,
                               M5Dial.Display.height() / 2);
+}
+
+String Game::getUid(uint8_t cardNum) {
+    return this->_cards[cardNum];
+}
+void Game::setUid(uint8_t cardNum, String uid) {
+    this->_cards[cardNum] = uid;
+}
+
+void Game::effect01() {
+    // 1秒に1回点滅する
+    if ((this->_effectStartTime - millis()) % 1000 > 500) {
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
+        }
+    } else {
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
+        }
+    }
+    this->_strip.show();
+}
+
+void Game::effect02() {
+    // 黄色が円の中心から外に向かって光る
+    if ((millis() - this->_effectStartTime) % 500 > 450)
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
+        }
+    else if ((millis() - this->_effectStartTime) % 500 > 300) {
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            if (i % 3 == 2) {
+                this->_strip.setPixelColor(i, this->_strip.Color(255, 255, 0));
+            } else {
+                this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
+            }
+        }
+    } else if ((millis() - this->_effectStartTime) % 500 > 150) {
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            if (i % 3 == 1) {
+                this->_strip.setPixelColor(i, this->_strip.Color(255, 255, 0));
+            } else {
+                this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
+            }
+        }
+    } else {
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            if (i % 3 == 0) {
+                this->_strip.setPixelColor(i, this->_strip.Color(255, 255, 0));
+            } else {
+                this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
+            }
+        }
+    }
+    this->_strip.show();
+}
+
+void Game::effect03() {
+    // 青色のばつが外から内にでる
+
+    if ((millis() - this->_effectStartTime) % 500 > 450) {
+        int blueArr[8] = {3, 6, 12, 15, 21, 24, 30, 33};
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
+            for (int j = 0; j < 8; j++) {
+                if (i == blueArr[j]) {
+                    this->_strip.setPixelColor(i,
+                                               this->_strip.Color(0, 0, 255));
+                }
+            }
+        }
+    } else if ((millis() - this->_effectStartTime) % 500 > 300) {
+        int blueArr[16] = {3,  4,  6,  7,  12, 13, 15, 16,
+                           21, 22, 24, 25, 30, 31, 33, 34};
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
+            for (int j = 0; j < 16; j++) {
+                if (i == blueArr[j]) {
+                    this->_strip.setPixelColor(i,
+                                               this->_strip.Color(0, 0, 255));
+                }
+            }
+        }
+    } else if ((millis() - this->_effectStartTime) % 500 > 150) {
+        int blueArr[24] = {3,  4,  5,  6,  7,  8,  12, 13, 14, 15, 16, 17,
+                           21, 22, 23, 24, 25, 26, 30, 31, 32, 33, 34, 35};
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
+            for (int j = 0; j < 24; j++) {
+                if (i == blueArr[j]) {
+                    this->_strip.setPixelColor(i,
+                                               this->_strip.Color(0, 0, 255));
+                }
+            }
+        }
+    } else {
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
+        }
+    }
+    this->_strip.show();
+}
+
+void Game::effect04() {
+    // 緑が円状に点滅する
+
+    if ((millis() - this->_effectStartTime) % 1000 > 500) {
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            if (i % 3 == 0 || i % 3 == 2) {
+                this->_strip.setPixelColor(i, this->_strip.Color(0, 255, 0));
+            } else {
+                this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
+            }
+        }
+    } else {
+        for (int i = 0; i < this->_strip.numPixels(); i++) {
+            if (i % 3 == 1) {
+                this->_strip.setPixelColor(i, this->_strip.Color(0, 255, 0));
+            } else {
+                this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
+            }
+        }
+    }
+    this->_strip.show();
+}
+void Game::effect05() {
+    for (int i = 0; i < this->_strip.numPixels(); i++) {
+        this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
+    }
+    this->_strip.show();
 }

@@ -23,4 +23,5 @@ void setup(void) {
 void loop(void) {
     game.read();
     game.encoder();
+    game.effect();
 }
