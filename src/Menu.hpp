@@ -15,6 +15,14 @@ public:
 
 protected:
     virtual void changeEncoder(long newPosition);
+    virtual void setImage(int index);
+    virtual void showImage(int index, int place);
+    virtual void setCircle(int index);
+    virtual void drawThickCircle(int centerX, int centerY, int radius,
+                                 int thickness, uint16_t color);
+    virtual void setFunction(String function);
+    virtual void setFunction(int index);
+    virtual String getFunction();
 
 private:
     long _oldPosition;
@@ -22,4 +30,5 @@ private:
     Adafruit_NeoPixel _strip;
     uint8_t _ledNum;
     int _volume;
+    String _function;
 };
