@@ -3,17 +3,23 @@
 #include "Adafruit_NeoPixel.h"
 #include "ImageViewer.hpp"
 #include "M5Dial.h"
+#include "M5UnitSynth.h"
 
+static M5UnitSynth synth;
 static ImageViewer viewer;
 
-Game::Game(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright)
+Game::Game(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright, int volume,
+           int tempo)
     : _mode("before"),
       _oldMode("before"),
       _ledNum(ledNum),
       _ledBright(ledBright),
       _strip(ledNum, ledPin, NEO_GRB + NEO_KHZ800),
       _oldPosition(-999),
-      _currentCardNum(255) {
+      _currentCardNum(255),
+      _volume(volume),
+      _tempo(tempo),
+      _drumNote(0) {
     _cards[0] = "44073ba2d5980";
     _cards[1] = "4fdb1266f6180";
     _cards[2] = "4e098355f6180";
@@ -62,6 +68,10 @@ bool Game::begin() {
     M5Dial.Display.setTextDatum(middle_center);
     this->_startTime = millis();
     this->_effectStartTime = millis();
+    synth.begin(&Serial2, UNIT_SYNTH_BAUD, 15, 13);
+    synth.setInstrument(0, 0, GrandPiano_1);
+    synth.setInstrument(0, 9, SynthDrum);
+    synth.setInstrument(29, 29, OverdrivenGuitar);
     return true;
 }
 
@@ -204,110 +214,224 @@ void Game::effect02() {
 
     unsigned long currentTime = millis();
     unsigned long elapsedTime = currentTime - this->_effectStartTime;
-    if (elapsedTime % 500 > 450) {
-        for (int i = 0; i < this->_strip.numPixels(); i++) {
-            this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
-        }
-    } else if (elapsedTime % 500 > 300) {
-        for (int i = 0; i < this->_strip.numPixels(); i++) {
-            if (i % 3 == 2) {
-                this->_strip.setPixelColor(i, this->_strip.Color(255, 255, 0));
-            } else {
-                this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
-            }
-        }
-    } else if (elapsedTime % 500 > 150) {
-        for (int i = 0; i < this->_strip.numPixels(); i++) {
-            if (i % 3 == 1) {
-                this->_strip.setPixelColor(i, this->_strip.Color(255, 255, 0));
-            } else {
-                this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
-            }
-        }
-    } else {
-        for (int i = 0; i < this->_strip.numPixels(); i++) {
-            if (i % 3 == 0) {
-                this->_strip.setPixelColor(i, this->_strip.Color(255, 255, 0));
-            } else {
-                this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
+    int effectTempo = 180;
+    unsigned long circle = 4 * 1000 * 60 / effectTempo;
+    unsigned long circleEight = circle / 8;
+
+    bool note[8] = {false};
+    for (int i = 0; i < 8; ++i) {
+        note[i] = (elapsedTime % circle > circleEight * i) &&
+                  (elapsedTime % circle < circleEight * (i + 1));
+    }
+
+    for (int i = 0; i < this->_strip.numPixels(); ++i) {
+        int color = this->_strip.Color(255, 0, 0);  // デフォルトは赤
+
+        if ((note[0] || note[1]) && i % 3 == 0)
+            color = this->_strip.Color(255, 255, 0);  // note1
+        if ((note[2] || note[3]) && i % 3 == 1)
+            color = this->_strip.Color(255, 255, 0);  // note3
+        if ((note[4] || note[5]) && i % 3 == 2)
+            color = this->_strip.Color(255, 255, 0);  // note5
+
+        this->_strip.setPixelColor(i, color);
+    }
+    this->_strip.show();
+
+    if (elapsedTime < circle * 3) {
+        for (int i = 0; i < 8; ++i) {
+            if (this->_drumNote == i && note[i]) {
+                playCorrect(i);
+                this->_drumNote = (this->_drumNote + 1) % 8;
             }
         }
     }
-
-    this->_strip.show();
 }
 
 void Game::effect03() {
     // 青色のばつが外から内にでる
 
-    if ((millis() - this->_effectStartTime) % 500 > 450) {
-        int blueArr[8] = {3, 6, 12, 15, 21, 24, 30, 33};
-        for (int i = 0; i < this->_strip.numPixels(); i++) {
-            this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
-            for (int j = 0; j < 8; j++) {
-                if (i == blueArr[j]) {
-                    this->_strip.setPixelColor(i,
-                                               this->_strip.Color(0, 0, 255));
-                }
-            }
-        }
-    } else if ((millis() - this->_effectStartTime) % 500 > 300) {
-        int blueArr[16] = {3,  4,  6,  7,  12, 13, 15, 16,
-                           21, 22, 24, 25, 30, 31, 33, 34};
-        for (int i = 0; i < this->_strip.numPixels(); i++) {
-            this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
-            for (int j = 0; j < 16; j++) {
-                if (i == blueArr[j]) {
-                    this->_strip.setPixelColor(i,
-                                               this->_strip.Color(0, 0, 255));
-                }
-            }
-        }
-    } else if ((millis() - this->_effectStartTime) % 500 > 150) {
-        int blueArr[24] = {3,  4,  5,  6,  7,  8,  12, 13, 14, 15, 16, 17,
-                           21, 22, 23, 24, 25, 26, 30, 31, 32, 33, 34, 35};
-        for (int i = 0; i < this->_strip.numPixels(); i++) {
-            this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
-            for (int j = 0; j < 24; j++) {
-                if (i == blueArr[j]) {
-                    this->_strip.setPixelColor(i,
-                                               this->_strip.Color(0, 0, 255));
-                }
-            }
-        }
+    unsigned long currentTime = millis();
+    unsigned long elapsedTime = currentTime - this->_effectStartTime;
+    int effectTempo = 220;
+    unsigned long circle = 4 * 1000 * 60 / effectTempo;
+    unsigned long circleEight = circle / 8;
+
+    bool note[8] = {false};
+    for (int i = 0; i < 8; ++i) {
+        note[i] = (elapsedTime % circle > circleEight * i) &&
+                  (elapsedTime % circle < circleEight * (i + 1));
+    }
+
+    int* blueArr;
+    int blueArrSize;
+
+    if (note[0] || note[1]) {
+        static int arr[] = {3,  4,  5,  6,  7,  8,  12, 13, 14, 15, 16, 17,
+                            21, 22, 23, 24, 25, 26, 30, 31, 32, 33, 34, 35};
+        blueArr = arr;
+        blueArrSize = 24;
+    } else if (note[2] || note[3]) {
+        static int arr[] = {3,  4,  6,  7,  12, 13, 15, 16,
+                            21, 22, 24, 25, 30, 31, 33, 34};
+        blueArr = arr;
+        blueArrSize = 16;
+    } else if (note[4] || note[5]) {
+        static int arr[] = {3, 6, 12, 15, 21, 24, 30, 33};
+        blueArr = arr;
+        blueArrSize = 8;
     } else {
-        for (int i = 0; i < this->_strip.numPixels(); i++) {
-            this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
+        blueArr = nullptr;
+        blueArrSize = 0;
+    }
+
+    for (int i = 0; i < this->_strip.numPixels(); ++i) {
+        int color = this->_strip.Color(0, 0, 0);
+        if (blueArr != nullptr) {
+            for (int j = 0; j < blueArrSize; ++j) {
+                if (i == blueArr[j]) {
+                    color = this->_strip.Color(0, 0, 255);
+                    break;
+                }
+            }
+        }
+        this->_strip.setPixelColor(i, color);
+    }
+
+    this->_strip.show();
+
+    if (elapsedTime < circle * 3) {
+        for (int i = 0; i < 8; ++i) {
+            if (this->_drumNote == i && note[i]) {
+                playWrong(i);
+                this->_drumNote = (this->_drumNote + 1) % 8;
+            }
         }
     }
-    this->_strip.show();
 }
 
 void Game::effect04() {
     // 緑が円状に点滅する
 
-    if ((millis() - this->_effectStartTime) % 1000 > 500) {
-        for (int i = 0; i < this->_strip.numPixels(); i++) {
-            if (i % 3 == 0 || i % 3 == 2) {
-                this->_strip.setPixelColor(i, this->_strip.Color(0, 255, 0));
-            } else {
-                this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
-            }
-        }
-    } else {
-        for (int i = 0; i < this->_strip.numPixels(); i++) {
-            if (i % 3 == 1) {
-                this->_strip.setPixelColor(i, this->_strip.Color(0, 255, 0));
-            } else {
-                this->_strip.setPixelColor(i, this->_strip.Color(0, 0, 0));
-            }
-        }
+    unsigned long currentTime = millis();
+    unsigned long elapsedTime = currentTime - this->_effectStartTime;
+    unsigned long circle = 4 * 1000 * 60 / this->_tempo;
+    unsigned long circleEight = circle / 8;
+
+    bool note[8] = {false};
+    for (int i = 0; i < 8; ++i) {
+        note[i] = (elapsedTime % circle > circleEight * i) &&
+                  (elapsedTime % circle < circleEight * (i + 1));
+    }
+
+    for (int i = 0; i < this->_strip.numPixels(); ++i) {
+        int color = this->_strip.Color(0, 0, 0);  // デフォルトは黒
+
+        if ((note[0] || note[1] || note[4] || note[5]) &&
+            (i % 3 == 0 || i % 3 == 2))
+            color = this->_strip.Color(0, 255, 0);  // note1
+        else if ((note[2] || note[3] || note[6] || note[7]) && (i % 3 == 1))
+            color = this->_strip.Color(0, 255, 0);  // note3
+        this->_strip.setPixelColor(i, color);
     }
     this->_strip.show();
+    for (int i = 0; i < 8; ++i) {
+        if (this->_drumNote == i && note[i]) {
+            playDrumPattern(i);
+            this->_drumNote = (this->_drumNote + 1) % 8;
+        }
+    }
 }
 void Game::effect05() {
     for (int i = 0; i < this->_strip.numPixels(); i++) {
         this->_strip.setPixelColor(i, this->_strip.Color(255, 0, 0));
     }
     this->_strip.show();
+}
+
+void Game::playDrumPattern(int eightNote) {
+    switch (eightNote) {
+        case 0:
+            synth.setNoteOn(9, 36, this->_volume);  // バスドラム
+            synth.setNoteOn(9, 42, this->_volume);  // ハイハット
+            break;
+        case 1:
+            synth.setNoteOff(9, 36, this->_volume);
+            synth.setNoteOn(9, 42, this->_volume);  // ハイハット
+            break;
+        case 2:
+            synth.setNoteOn(9, 38, this->_volume);  // スネアドラム
+            synth.setNoteOn(9, 42, this->_volume);  // ハイハット
+            break;
+        case 3:
+            synth.setNoteOff(9, 38, this->_volume);
+            synth.setNoteOn(9, 46, this->_volume);  // オープンハイハット
+            break;
+        case 4:
+            synth.setNoteOn(9, 36, this->_volume);  // バスドラム
+            synth.setNoteOn(9, 42, this->_volume);  // ハイハット
+            break;
+        case 5:
+            synth.setNoteOn(9, 36, this->_volume);
+            synth.setNoteOn(9, 42, this->_volume);  // ハイハット
+            break;
+        case 6:
+            synth.setNoteOff(9, 36, this->_volume);
+            synth.setNoteOn(9, 38, this->_volume);  // スネアドラム
+            synth.setNoteOn(9, 42, this->_volume);  // ハイハット
+            break;
+        case 7:
+            synth.setNoteOff(9, 38, this->_volume);
+            synth.setNoteOn(9, 46, this->_volume);  // オープンハイハット
+            break;
+        default:
+            break;
+    }
+}
+
+void Game::playCorrect(int eightNote) {
+    switch (eightNote) {
+        case 0:
+            synth.setNoteOn(0, 88, this->_volume);
+            break;
+        case 1:
+            synth.setNoteOff(0, 88, this->_volume);
+            synth.setNoteOn(0, 84, this->_volume);
+            break;
+        case 2:
+            synth.setNoteOff(0, 84, this->_volume);
+            synth.setNoteOn(0, 88, this->_volume);
+            break;
+        case 3:
+            synth.setNoteOff(0, 88, this->_volume);
+            synth.setNoteOn(0, 84, this->_volume);
+            break;
+        case 4:
+            synth.setNoteOff(0, 84, this->_volume);
+            synth.setNoteOn(0, 88, this->_volume);
+            break;
+        case 5:
+            synth.setNoteOff(0, 88, this->_volume);
+            synth.setNoteOn(0, 84, this->_volume);
+            break;
+        case 6:
+            synth.setNoteOff(0, 84, this->_volume);
+            break;
+        case 7:
+            break;
+        default:
+            break;
+    }
+}
+
+void Game::playWrong(int eightNote) {
+    switch (eightNote) {
+        case 0:
+            synth.setNoteOn(29, 43, this->_volume);
+            break;
+        case 4:
+            synth.setNoteOff(29, 43, this->_volume);
+        default:
+            break;
+    }
 }
