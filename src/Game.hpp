@@ -10,6 +10,7 @@ public:
     Game(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright);
     virtual ~Game();
     virtual bool begin();
+    virtual void checkCardNum();
     virtual void read();
     virtual void encoder();
     virtual void effect();

@@ -15,7 +15,37 @@ Game::Game(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright)
       _oldPosition(-999),
       _currentCardNum(255) {
     _cards[0] = "44073ba2d5980";
-    _cards[1] = "44073ba2d5980";
+    _cards[1] = "4fdb1266f6180";
+    _cards[2] = "4e098355f6180";
+    _cards[3] = "4bc22315f6180";
+    _cards[4] = "4e09d315f6180";
+    _cards[5] = "4a3e0256f6180";
+    _cards[6] = "4edfd315f6180";
+    _cards[7] = "47969325f6180";
+    _cards[8] = "450dc256f6180";
+    _cards[9] = "4c6bc266f6180";
+    _cards[10] = "45556266f6180";
+    _cards[11] = "46128315f6180";
+    _cards[12] = "4866a325f6180";
+    _cards[13] = "469a7315f6180";
+    _cards[14] = "47dc9256f6180";
+    _cards[15] = "4da1b315f6180";
+    _cards[16] = "4c1e0305f6181";
+    _cards[17] = "4555b2e5f6180";
+    _cards[18] = "4d64b256f6180";
+    _cards[19] = "41722345f6180";
+    _cards[20] = "4fce3335f6180";
+    _cards[21] = "469c9246f6180";
+    _cards[22] = "44417345f6180";
+    _cards[23] = "4f0bbfa9f6180";
+    _cards[24] = "4cb1fb9f6180";
+    _cards[25] = "45cf2fa9f6181";
+    _cards[26] = "49ccbfa9f6181";
+    _cards[27] = "475defa9f6180";
+    _cards[28] = "4dc98fa9f6181";
+    _cards[29] = "4449dfa9f6180";
+    _cards[30] = "4f76d1a06181";
+    _cards[31] = "42114335f6180";
 }
 
 Game::~Game() {
@@ -33,6 +63,26 @@ bool Game::begin() {
     this->_startTime = millis();
     this->_effectStartTime = millis();
     return true;
+}
+
+void Game::checkCardNum() {
+    if (M5Dial.Rfid.PICC_IsNewCardPresent() &&
+        M5Dial.Rfid.PICC_ReadCardSerial()) {
+        M5Dial.Speaker.tone(8000, 20);
+        M5Dial.Display.clear();
+        String uid = "";
+        for (byte i = 0; i < M5Dial.Rfid.uid.size; i++) {
+            uid += String(M5Dial.Rfid.uid.uidByte[i], HEX);
+        }
+        int cardNum;
+        for (int i = 0; i < 32; i++) {
+            if (uid == getUid(i)) {
+                cardNum = i;
+            }
+        }
+        M5Dial.Display.drawString(String(cardNum), M5Dial.Display.width() / 2,
+                                  M5Dial.Display.height() / 2);
+    }
 }
 
 void Game::read() {

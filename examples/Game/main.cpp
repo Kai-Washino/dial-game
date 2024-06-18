@@ -21,6 +21,7 @@ void setup(void) {
 }
 
 void loop(void) {
+    // game.checkCardNum();
     game.read();
     game.encoder();
     game.effect();
