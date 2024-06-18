@@ -2,12 +2,14 @@
 
 // clang-format off
 #include <M5Dial.h>
+#include <M5UnitSynth.h>
 #include "Adafruit_NeoPixel.h"
 // clang-format on
 
 class Game {
 public:
-    Game(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright);
+    Game(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright, int volume,
+         int tempo);
     virtual ~Game();
     virtual bool begin();
     virtual void checkCardNum();
@@ -38,6 +40,10 @@ protected:
     void effect04();
     void effect05();
 
+    void playDrumPattern(int eightNote);
+    void playCorrect(int eightNote);
+    void playWrong(int eightNote);
+
 private:
     unsigned long _startTime;
     unsigned long _effectStartTime;
@@ -49,4 +55,7 @@ private:
     uint8_t _ledBright;
     Adafruit_NeoPixel _strip;
     uint8_t _ledNum;
+    int _volume;
+    int _tempo;
+    uint8_t _drumNote;
 };

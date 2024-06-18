@@ -1,7 +1,8 @@
 #include "Memory.hpp"
 
-Memory::Memory(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright)
-    : Game(ledPin, ledNum, ledBright) {
+Memory::Memory(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright, int volume,
+               int tempo)
+    : Game(ledPin, ledNum, ledBright, volume, tempo) {
     generatePairs();
 }
 Memory::~Memory() {

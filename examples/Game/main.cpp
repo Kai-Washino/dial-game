@@ -5,8 +5,11 @@
 #define PIN        2
 #define NUM_LEDS   48
 #define LED_BRIGHT 100
+#define VOLUME     40
+#define TEMPO      160
 
-Game game(PIN, NUM_LEDS, LED_BRIGHT);  // LEDの信号ピンとLEDの数と光度
+Game game(PIN, NUM_LEDS, LED_BRIGHT, VOLUME,
+          TEMPO);  // LEDの信号ピンとLEDの数と光度と音量とドラムのテンポ
 
 void forever(void) {
     while (true) {
