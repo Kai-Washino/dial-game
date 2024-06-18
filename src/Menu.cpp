@@ -60,12 +60,12 @@ void Menu::button() {
     M5Dial.update();
     if (M5Dial.BtnA.wasPressed()) {
         M5Dial.Speaker.tone(8000, 20);
-        changeEncoder(this->_oldPosition);
+        setImage(this->_oldPosition);
         setStartGame(false);
     }
     if (M5Dial.BtnA.wasReleased()) {
         M5Dial.Speaker.tone(8000, 20);
-        changeEncoder(this->_oldPosition);
+        setImage(this->_oldPosition);
         setStartGame(false);
     }
 }
@@ -73,8 +73,11 @@ void Menu::button() {
 void Menu::changeEncoder(long newPosition) {
     int position =
         (newPosition % 8 < 0) ? newPosition % 8 + 8 : newPosition % 8;
-    setImage(position);
+    setCircle(position);
     setFunction(position);
+    M5Dial.Display.fillRect(
+        M5Dial.Display.width() / 4, M5Dial.Display.height() / 5 * 2,
+        M5Dial.Display.width() / 2, M5Dial.Display.height() / 5, BLACK);
     M5Dial.Display.drawString(getFunction(), M5Dial.Display.width() / 2,
                               M5Dial.Display.height() / 2);
 }
@@ -85,10 +88,10 @@ void Menu::setImage(int index) {
     showImage(17, 1);
     showImage(18, 2);
     showImage(19, 3);
-    showImage(17, 4);
-    showImage(17, 5);
-    showImage(17, 6);
-    showImage(17, 7);
+    showImage(20, 4);
+    showImage(21, 5);
+    showImage(22, 6);
+    showImage(23, 7);
     setCircle(index);
 }
 
@@ -99,53 +102,33 @@ void Menu::showImage(int index, int place) {
 void Menu::setCircle(int place) {
     uint16_t sizeX = M5.Display.width() / 4;
     uint16_t sizeY = M5.Display.height() / 4;
-    int16_t placeX;
-    int16_t placeY;
+    float radius = M5.Display.width() / 11;
 
-    switch (place) {
-        case 7:
-            placeX = sizeX * 0;
-            placeY = sizeY * 1.5;
-            break;
-        case 6:
-            placeX = sizeX * 1.1;
-            placeY = sizeY * 1.1;
-            break;
-        case 5:
-            placeX = sizeX * 1.5;
-            placeY = sizeY * 0;
-            break;
-        case 4:
-            placeX = sizeX * 1.1;
-            placeY = sizeY * -1.1;
-            break;
-        case 3:
-            placeX = sizeX * 0;
-            placeY = sizeY * -1.5;
-            break;
-        case 2:
-            placeX = sizeX * -1.1;
-            placeY = sizeY * -1.1;
-            break;
-        case 1:
-            placeX = sizeX * -1.5;
-            placeY = sizeY * 0;
-            break;
-        case 0:
-            placeX = sizeX * -1;
-            placeY = sizeY * 1;
-            break;
-        default:
-            placeX = sizeX * 0;
-            placeY = sizeY * 0;
-            break;
+    const int16_t positions[8][2] = {
+        {static_cast<int16_t>(-1 * sizeX),
+         static_cast<int16_t>(1 * sizeY)},  // case 0
+        {static_cast<int16_t>(-1.5 * sizeX),
+         static_cast<int16_t>(0 * sizeY)},  // case 1
+        {static_cast<int16_t>(-1.1 * sizeX),
+         static_cast<int16_t>(-1.1 * sizeY)},  // case 2
+        {static_cast<int16_t>(0 * sizeX),
+         static_cast<int16_t>(-1.5 * sizeY)},  // case 3
+        {static_cast<int16_t>(1.1 * sizeX),
+         static_cast<int16_t>(-1.1 * sizeY)},  // case 4
+        {static_cast<int16_t>(1.5 * sizeX),
+         static_cast<int16_t>(0 * sizeY)},  // case 5
+        {static_cast<int16_t>(1.1 * sizeX),
+         static_cast<int16_t>(1.1 * sizeY)},  // case 6
+        {static_cast<int16_t>(0 * sizeX),
+         static_cast<int16_t>(1.5 * sizeY)}  // case 7
+    };
+
+    for (int i = 0; i < 8; i++) {
+        uint16_t color = (i == place) ? TFT_CYAN : TFT_BLACK;
+        drawThickCircle(M5.Display.width() / 2 + positions[i][0],
+                        M5.Display.height() / 2 + positions[i][1], radius, 5,
+                        color);
     }
-
-    float radius = M5.Display.width() / 11;  // 円の半径
-    uint16_t color = TFT_CYAN;               // 円の枠の色
-
-    drawThickCircle(M5.Display.width() / 2 + placeX,
-                    M5.Display.height() / 2 + placeY, radius, 5, color);
 }
 
 void Menu::drawThickCircle(int centerX, int centerY, int radius, int thickness,
@@ -162,6 +145,18 @@ void Menu::setFunction(String function) {
 void Menu::setFunction(int index) {
     String function;
     switch (index) {
+        case 0:
+            function = "S2";
+            break;
+        case 1:
+            function = "Washino";
+            break;
+        case 2:
+            function = "Ibuki";
+            break;
+        case 3:
+            function = "Tsuji";
+            break;
         case 4:
             function = "UID";
             break;
