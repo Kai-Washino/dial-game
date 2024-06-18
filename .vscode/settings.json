@@ -24,7 +24,8 @@
         "string_view": "cpp",
         "initializer_list": "cpp",
         "random": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "functional": "cpp"
     },
     "cSpell.words": [
         "coreink",
