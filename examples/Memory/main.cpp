@@ -5,7 +5,7 @@
 #define PIN        2
 #define NUM_LEDS   48
 #define LED_BRIGHT 100
-#define VOLUME     40
+#define VOLUME     100
 #define TEMPO      160
 
 Memory memory(PIN, NUM_LEDS, LED_BRIGHT, VOLUME,

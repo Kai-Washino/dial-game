@@ -23,10 +23,10 @@ void Memory::generatePairs() {
 }
 
 void Memory::compareCard(uint8_t nowCardNum, uint8_t oldCardNum) {
+    viewImage(getPairID(nowCardNum));
     if (nowCardNum == oldCardNum) {
         return;
     }
-    viewImage(nowCardNum);
     if (getMode() == "stay") {
         if (isPair(nowCardNum, oldCardNum)) {
             setMode("correct");
