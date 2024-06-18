@@ -6,13 +6,15 @@
 #include <utility>
 #include <algorithm>
 #include <M5Dial.h>
+#include <M5UnitSynth.h>
 #include "Game.hpp"
 #include "Adafruit_NeoPixel.h"
 // clang-format on
 
 class Memory : public Game {
 public:
-    Memory(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright);
+    Memory(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright, int volume,
+           int tempo);
     virtual ~Memory();
     void generatePairs();
 
