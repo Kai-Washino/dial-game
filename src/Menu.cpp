@@ -13,7 +13,8 @@ Menu::Menu(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright, int volume)
       _ledBright(ledBright),
       _strip(ledNum, ledPin, NEO_GRB + NEO_KHZ800),
       _oldPosition(-999),
-      _volume(volume) {
+      _volume(volume),
+      _startGame(false) {
     setFunction("uid check");
 }
 
@@ -44,6 +45,28 @@ void Menu::encoder() {
         M5Dial.Speaker.tone(8000, 20);
         this->_oldPosition = newPosition;
         changeEncoder(newPosition);
+    }
+}
+
+void Menu::touch() {
+    auto t = M5Dial.Touch.getDetail();
+    if (this->_prev_state != t.state) {
+        this->_prev_state = t.state;
+        setStartGame(true);
+    }
+}
+
+void Menu::button() {
+    M5Dial.update();
+    if (M5Dial.BtnA.wasPressed()) {
+        M5Dial.Speaker.tone(8000, 20);
+        changeEncoder(this->_oldPosition);
+        setStartGame(false);
+    }
+    if (M5Dial.BtnA.wasReleased()) {
+        M5Dial.Speaker.tone(8000, 20);
+        changeEncoder(this->_oldPosition);
+        setStartGame(false);
     }
 }
 
@@ -159,4 +182,12 @@ void Menu::setFunction(int index) {
 
 String Menu::getFunction() {
     return this->_function;
+}
+
+void Menu::setStartGame(bool flag) {
+    this->_startGame = flag;
+}
+
+bool Menu::getStartGame() {
+    return this->_startGame;
 }

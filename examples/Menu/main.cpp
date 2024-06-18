@@ -23,6 +23,14 @@ void setup(void) {
 }
 
 void loop(void) {
-    // menu.checkCardNum();
-    menu.encoder();
+    if (menu.getStartGame()) {
+        M5Dial.Display.clear();
+        M5Dial.Display.drawString(menu.getFunction(),
+                                  M5Dial.Display.width() / 2,
+                                  M5Dial.Display.height() / 2);
+        menu.button();
+    } else {
+        menu.touch();
+        menu.encoder();
+    }
 }

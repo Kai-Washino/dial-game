@@ -12,6 +12,10 @@ public:
     virtual ~Menu();
     virtual bool begin();
     virtual void encoder();
+    virtual void touch();
+    virtual void button();
+    virtual String getFunction();
+    virtual bool getStartGame();
 
 protected:
     virtual void changeEncoder(long newPosition);
@@ -22,7 +26,7 @@ protected:
                                  int thickness, uint16_t color);
     virtual void setFunction(String function);
     virtual void setFunction(int index);
-    virtual String getFunction();
+    virtual void setStartGame(bool flag);
 
 private:
     long _oldPosition;
@@ -31,4 +35,6 @@ private:
     uint8_t _ledNum;
     int _volume;
     String _function;
+    m5::touch_state_t _prev_state;
+    bool _startGame;
 };
