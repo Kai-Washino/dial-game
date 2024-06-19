@@ -202,7 +202,7 @@ void Menu::setFunction(int index) {
             function = "Effect";
             break;
         case 6:
-            function = "UP DOWN";
+            function = "H&L";
             break;
         case 7:
             function = "Memory";
