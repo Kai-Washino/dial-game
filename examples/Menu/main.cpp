@@ -24,11 +24,9 @@ void setup(void) {
 
 void loop(void) {
     if (menu.getStartGame()) {
-        M5Dial.Display.clear();
-        M5Dial.Display.drawString(menu.getFunction(),
-                                  M5Dial.Display.width() / 2,
-                                  M5Dial.Display.height() / 2);
-        menu.button();
+        if (!menu.effect()) {
+            menu.button();
+        }
     } else {
         menu.touch();
         menu.encoder();
