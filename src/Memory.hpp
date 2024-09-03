@@ -17,11 +17,13 @@ public:
            int tempo);
     virtual ~Memory();
     void generatePairs();
+    void read();
 
 protected:
     void compareCard(uint8_t nowCardNum, uint8_t oldCardNum) override;
 
 private:
+    unsigned long _effectStartTime;
     std::vector<std::pair<int, int>> pairs;
     std::vector<int> ids;
     std::map<int, int> pairIDMap;
