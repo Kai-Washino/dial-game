@@ -12,6 +12,7 @@ public:
          int tempo);
     virtual ~Game();
     virtual bool begin();
+    virtual void checkCardUID();
     virtual void checkCardNum();
     virtual void read();
     virtual void encoder();

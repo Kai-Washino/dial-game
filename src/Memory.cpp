@@ -21,6 +21,39 @@ void Memory::generatePairs() {
     }
     assignPairIDs();
 }
+void Memory::read() {
+    if (M5Dial.Rfid.PICC_IsNewCardPresent() &&
+        M5Dial.Rfid.PICC_ReadCardSerial()) {
+        M5Dial.Speaker.tone(8000, 20);
+        M5Dial.Display.clear();
+        String uid = "";
+        for (byte i = 0; i < M5Dial.Rfid.uid.size; i++) {
+            uid += String(M5Dial.Rfid.uid.uidByte[i], HEX);
+        }
+        checkUid(uid);
+    }
+    if (getMode() == "correct") {
+        int currentCardID = getPairID(getCurrentCardNum());
+        if (currentCardID == 0 || currentCardID == 1 || currentCardID == 15) {
+            unsigned long currentTime = millis();
+            unsigned long elapsedTime = currentTime - this->_effectStartTime;
+            if (elapsedTime % 4000 > 2000) {
+                viewImage(34);
+            } else {
+                viewImage(currentCardID);
+            }
+        } else if (currentCardID == 2 || currentCardID == 3 ||
+                   currentCardID == 4) {
+            unsigned long currentTime = millis();
+            unsigned long elapsedTime = currentTime - this->_effectStartTime;
+            if (elapsedTime % 4000 > 2000) {
+                viewImage(35);
+            } else {
+                viewImage(currentCardID);
+            }
+        }
+    }
+}
 
 void Memory::compareCard(uint8_t nowCardNum, uint8_t oldCardNum) {
     viewImage(getPairID(nowCardNum));
