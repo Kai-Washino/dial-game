@@ -20,7 +20,7 @@ Game::Game(uint8_t ledPin, uint8_t ledNum, uint8_t ledBright, int volume,
       _volume(volume),
       _tempo(tempo),
       _drumNote(0) {
-    _cards[0] = "44073ba2d5980";
+    _cards[0] = "43af325f6180";
     _cards[1] = "4fdb1266f6180";
     _cards[2] = "4e098355f6180";
     _cards[3] = "4bc22315f6180";
@@ -73,6 +73,19 @@ bool Game::begin() {
     synth.setInstrument(0, 9, SynthDrum);
     synth.setInstrument(29, 29, OverdrivenGuitar);
     return true;
+}
+void Game::checkCardUID() {
+    if (M5Dial.Rfid.PICC_IsNewCardPresent() &&
+        M5Dial.Rfid.PICC_ReadCardSerial()) {
+        M5Dial.Speaker.tone(8000, 20);
+        M5Dial.Display.clear();
+        String uid = "";
+        for (byte i = 0; i < M5Dial.Rfid.uid.size; i++) {
+            uid += String(M5Dial.Rfid.uid.uidByte[i], HEX);
+        }
+        M5Dial.Display.drawString(uid, M5Dial.Display.width() / 2,
+                                  M5Dial.Display.height() / 2);
+    }
 }
 
 void Game::checkCardNum() {

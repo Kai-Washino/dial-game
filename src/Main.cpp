@@ -1,5 +1,6 @@
 // clang-format off
 #include "Menu.hpp"
+#include "Game.hpp"
 #include "Memory.hpp"
 // clang-format on
 
@@ -10,6 +11,7 @@
 #define TEMPO      160
 
 Menu menu(PIN, NUM_LEDS, LED_BRIGHT, VOLUME);
+Game geme(PIN, NUM_LEDS, LED_BRIGHT, VOLUME, TEMPO);
 Memory memory(PIN, NUM_LEDS, LED_BRIGHT, VOLUME, TEMPO);
 
 String game;
@@ -30,11 +32,15 @@ void setup(void) {
 }
 
 void loop(void) {
+    menu.button();
     if (menu.getStartGame()) {
         if (!menu.effect()) {
-            menu.button();
-            memory.read();
-            memory.effect();
+            if (menu.getFunction() == "UID") {
+                geme.checkCardUID();
+            } else if (menu.getFunction() == "Memory") {
+                memory.read();
+                memory.effect();
+            }
         }
     } else {
         menu.touch();
