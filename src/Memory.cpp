@@ -32,12 +32,26 @@ void Memory::read() {
         }
         checkUid(uid);
     }
-    unsigned long currentTime = millis();
-    unsigned long elapsedTime = currentTime - this->_effectStartTime;
-    if (elapsedTime % 4000 > 2000) {
-        viewImage(31);
-    } else {
-        viewImage(1);
+    if (getMode() == "correct") {
+        int currentCardID = getPairID(getCurrentCardNum());
+        if (currentCardID == 0 || currentCardID == 1 || currentCardID == 15) {
+            unsigned long currentTime = millis();
+            unsigned long elapsedTime = currentTime - this->_effectStartTime;
+            if (elapsedTime % 4000 > 2000) {
+                viewImage(34);
+            } else {
+                viewImage(currentCardID);
+            }
+        } else if (currentCardID == 2 || currentCardID == 3 ||
+                   currentCardID == 4) {
+            unsigned long currentTime = millis();
+            unsigned long elapsedTime = currentTime - this->_effectStartTime;
+            if (elapsedTime % 4000 > 2000) {
+                viewImage(35);
+            } else {
+                viewImage(currentCardID);
+            }
+        }
     }
 }
 
