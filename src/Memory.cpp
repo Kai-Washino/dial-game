@@ -34,7 +34,8 @@ void Memory::read() {
     }
     if (getMode() == "correct") {
         int currentCardID = getPairID(getCurrentCardNum());
-        if (currentCardID == 0 || currentCardID == 1 || currentCardID == 15) {
+        if (currentCardID == 0 || currentCardID == 1 || currentCardID == 14 ||
+            currentCardID == 15) {
             unsigned long currentTime = millis();
             unsigned long elapsedTime = currentTime - this->_effectStartTime;
             if (elapsedTime % 4000 > 2000) {
@@ -48,6 +49,15 @@ void Memory::read() {
             unsigned long elapsedTime = currentTime - this->_effectStartTime;
             if (elapsedTime % 4000 > 2000) {
                 viewImage(35);
+            } else {
+                viewImage(currentCardID);
+            }
+        } else if (currentCardID == 5 || currentCardID == 6 ||
+                   currentCardID == 7) {
+            unsigned long currentTime = millis();
+            unsigned long elapsedTime = currentTime - this->_effectStartTime;
+            if (elapsedTime % 4000 > 2000) {
+                viewImage(36);
             } else {
                 viewImage(currentCardID);
             }

@@ -4,7 +4,7 @@
 
 #define PIN        2
 #define NUM_LEDS   48
-#define LED_BRIGHT 100
+#define LED_BRIGHT 127
 #define VOLUME     40
 
 Menu menu(PIN, NUM_LEDS, LED_BRIGHT,
